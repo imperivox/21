@@ -12,6 +12,7 @@ import com.imperivox.android2clean.ui.screens.explorer.FileExplorerScreen
 import com.imperivox.android2clean.ui.screens.database.DatabaseOptimizerScreen
 import com.imperivox.android2clean.ui.screens.duplicates.DuplicateFinderScreen
 import com.imperivox.android2clean.ui.screens.systemcleaner.SystemCleanerScreen
+import com.imperivox.android2clean.ui.screens.corpses.CorpseFinderScreen
 
 @Composable
 fun NavigationGraph(navController: NavHostController) {
@@ -27,7 +28,8 @@ fun NavigationGraph(navController: NavHostController) {
                 onNavigateToExplorer = { navController.navigate(Screen.FileExplorer.route) },
                 onNavigateToDatabase = { navController.navigate(Screen.DatabaseOptimizer.route) },
                 onNavigateToDuplicates = { navController.navigate(Screen.DuplicateFinder.route) },
-                onNavigateToSystemCleaner = { navController.navigate(Screen.SystemCleaner.route) }
+                onNavigateToSystemCleaner = { navController.navigate(Screen.SystemCleaner.route) },
+                onNavigateToCorpseFinder = { navController.navigate(Screen.CorpseFinder.route) }
             )
         }
         composable(Screen.AppManager.route) {
@@ -50,6 +52,9 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(Screen.SystemCleaner.route) {
             SystemCleanerScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(Screen.CorpseFinder.route) {
+            CorpseFinderScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }

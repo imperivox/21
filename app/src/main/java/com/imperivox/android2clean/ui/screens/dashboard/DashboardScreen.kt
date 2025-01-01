@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,6 +27,7 @@ fun DashboardScreen(
     onNavigateToDatabase: () -> Unit,
     onNavigateToDuplicates: () -> Unit,
     onNavigateToSystemCleaner: () -> Unit,
+    onNavigateToCorpseFinder: () -> Unit,
     viewModel: DashboardViewModel = viewModel()
 ) {
     val junkFiles by viewModel.junkFiles.collectAsState()
@@ -87,6 +89,12 @@ fun DashboardScreen(
             subtitle = "Find duplicate files",
             icon = Icons.Default.Filter,
             onClick = onNavigateToDuplicates
+        )
+        DashboardCard(
+            title = "Corpse Finder",
+            subtitle = "Find app corpses",
+            icon = Icons.Default.PersonOff,
+            onClick = onNavigateToCorpseFinder
         )
     }
 }

@@ -9,4 +9,5 @@ sealed class Screen(val route: String) {
     object DatabaseOptimizer : Screen("database_optimizer")
     object DuplicateFinder : Screen("duplicate_finder")
     object SystemCleaner : Screen("system_cleaner")
+    object CorpseFinder : Screen("corpse_finder")
 }
