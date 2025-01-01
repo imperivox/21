@@ -25,6 +25,7 @@ fun DashboardScreen(
     onNavigateToExplorer: () -> Unit,
     onNavigateToDatabase: () -> Unit,
     onNavigateToDuplicates: () -> Unit,
+    onNavigateToSystemCleaner: () -> Unit,
     viewModel: DashboardViewModel = viewModel()
 ) {
     val junkFiles by viewModel.junkFiles.collectAsState()
@@ -62,7 +63,12 @@ fun DashboardScreen(
             isLoading = isScanning,
             onClick = onNavigateToCache
         )
-
+        DashboardCard(
+            title = "System Cleaner",
+            subtitle = "Clean system files and residuals",
+            icon = Icons.Default.Build,
+            onClick = onNavigateToSystemCleaner
+        )
         DashboardCard(
             title = "File Explorer",
             subtitle = "Browse and manage files",
