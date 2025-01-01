@@ -9,6 +9,8 @@ import com.imperivox.android2clean.ui.screens.appmanager.AppManagerScreen
 import com.imperivox.android2clean.ui.screens.storage.StorageAnalyzerScreen
 import com.imperivox.android2clean.ui.screens.cache.CacheCleanerScreen
 import com.imperivox.android2clean.ui.screens.explorer.FileExplorerScreen
+import com.imperivox.android2clean.ui.screens.database.DatabaseOptimizerScreen
+import com.imperivox.android2clean.ui.screens.duplicates.DuplicateFinderScreen
 
 @Composable
 fun NavigationGraph(navController: NavHostController) {
@@ -21,7 +23,9 @@ fun NavigationGraph(navController: NavHostController) {
                 onNavigateToAppManager = { navController.navigate(Screen.AppManager.route) },
                 onNavigateToStorage = { navController.navigate(Screen.StorageAnalyzer.route) },
                 onNavigateToCache = { navController.navigate(Screen.CacheCleaner.route) },
-                onNavigateToExplorer = { navController.navigate(Screen.FileExplorer.route) }
+                onNavigateToExplorer = { navController.navigate(Screen.FileExplorer.route) },
+                onNavigateToDatabase = { navController.navigate(Screen.DatabaseOptimizer.route) },
+                onNavigateToDuplicates = { navController.navigate(Screen.DuplicateFinder.route) }
             )
         }
         composable(Screen.AppManager.route) {
@@ -35,6 +39,12 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(Screen.FileExplorer.route) {
             FileExplorerScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(Screen.DatabaseOptimizer.route) {
+            DatabaseOptimizerScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(Screen.DuplicateFinder.route) {
+            DuplicateFinderScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }

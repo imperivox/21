@@ -42,7 +42,21 @@ class FileOperationsHandler(private val repository: FileExplorerRepository) {
 
     suspend fun renameFile(file: FileItem, newName: String): Boolean {
         return try {
-            val newPath = File(file.path).parentFile?.absolutePath + File.separator + newName
+            val currentFile = File(file.path)
+            val parentPath = currentFile.parent ?: return false
+            val newPath = File(parentPath, newName).absolutePath
+
+            // Check if target file already exists
+            if (File(newPath).exists()) {
+                return false
+            }
+
+            // For directories, use renameTo directly as it's more reliable for directories
+            if (file.isDirectory) {
+                return currentFile.renameTo(File(newPath))
+            }
+
+            // For files, use the repository's moveFile which handles permissions
             repository.moveFile(file.path, newPath)
         } catch (e: Exception) {
             false

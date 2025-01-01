@@ -11,7 +11,7 @@ class CleanerRepository(context: Context) {
     
     fun scanJunkFiles(): Flow<List<JunkFile>> = junkScanner.scanJunkFiles()
     
-    suspend fun cleanJunkFiles(files: List<JunkFile>): Boolean {
+    fun cleanJunkFiles(files: List<JunkFile>): Boolean {
         return try {
             files.forEach { junkFile ->
                 File(junkFile.path).delete()

@@ -6,14 +6,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.imperivox.android2clean.data.model.FileItem
 import com.imperivox.android2clean.data.repository.FileExplorerRepository
-import com.imperivox.android2clean.ui.utils.FileUtils
+import com.imperivox.android2clean.utils.FileUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.io.File
 
 class FileExplorerViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = FileExplorerRepository(application)
+    private val repository = FileExplorerRepository()
     private val fileOperationsHandler = FileOperationsHandler(repository)
 
     private val _currentPath = MutableStateFlow(getInitialPath())
@@ -32,6 +33,10 @@ class FileExplorerViewModel(application: Application) : AndroidViewModel(applica
     val showCopyDialog: StateFlow<FileItem?> = fileOperationsHandler.showCopyDialog
     val showMoveDialog: StateFlow<FileItem?> = fileOperationsHandler.showMoveDialog
 
+    init {
+        loadCurrentDirectory()
+    }
+
     private fun getInitialPath(): String {
         return Environment.getExternalStorageDirectory().absolutePath
     }
@@ -45,12 +50,13 @@ class FileExplorerViewModel(application: Application) : AndroidViewModel(applica
                 _error.value = null
 
                 repository.searchFiles(query, _currentPath.value, searchContent)
+                    .catch { e ->
+                        _error.value = "Search failed: ${e.message}"
+                        _files.value = emptyList()
+                    }
                     .collect { results ->
                         _files.value = results
                     }
-            } catch (e: Exception) {
-                _error.value = "Search failed: ${e.message}"
-                _files.value = emptyList()
             } finally {
                 _isSearching.value = false
             }
@@ -92,6 +98,10 @@ class FileExplorerViewModel(application: Application) : AndroidViewModel(applica
             try {
                 _error.value = null
                 repository.listFiles(_currentPath.value)
+                    .catch { e ->
+                        _error.value = "Failed to load directory: ${e.message}"
+                        _files.value = emptyList()
+                    }
                     .collect { fileList ->
                         _files.value = fileList
                     }

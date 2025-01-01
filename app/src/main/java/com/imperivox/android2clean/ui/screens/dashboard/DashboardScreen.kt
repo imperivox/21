@@ -3,7 +3,9 @@ package com.imperivox.android2clean.ui.screens.dashboard
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
@@ -21,6 +23,8 @@ fun DashboardScreen(
     onNavigateToStorage: () -> Unit,
     onNavigateToCache: () -> Unit,
     onNavigateToExplorer: () -> Unit,
+    onNavigateToDatabase: () -> Unit,
+    onNavigateToDuplicates: () -> Unit,
     viewModel: DashboardViewModel = viewModel()
 ) {
     val junkFiles by viewModel.junkFiles.collectAsState()
@@ -64,6 +68,19 @@ fun DashboardScreen(
             subtitle = "Browse and manage files",
             icon = Icons.Default.Folder,
             onClick = onNavigateToExplorer
+        )
+
+        DashboardCard(
+            title = "Database Optimizer",
+            subtitle = "Optimize SQLite databases",
+            icon = Icons.Default.Build,
+            onClick = onNavigateToDatabase
+        )
+        DashboardCard(
+            title = "Duplicate Finder",
+            subtitle = "Find duplicate files",
+            icon = Icons.Default.Filter,
+            onClick = onNavigateToDuplicates
         )
     }
 }

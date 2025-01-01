@@ -1,6 +1,5 @@
 package com.imperivox.android2clean.data.repository
 
-import android.content.Context
 import android.webkit.MimeTypeMap
 import com.imperivox.android2clean.data.model.FileItem
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +10,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Date
 
-class FileExplorerRepository(private val context: Context) {
+class FileExplorerRepository {
     fun listFiles(path: String): Flow<List<FileItem>> = flow {
         val directory = File(path)
         val files = directory.listFiles()?.map { file ->
@@ -43,7 +42,7 @@ class FileExplorerRepository(private val context: Context) {
         query: String,
         searchContent: Boolean,
         results: MutableList<FileItem>
-    ) = withContext(Dispatchers.IO) {
+    ): Unit = withContext(Dispatchers.IO) {
         directory.listFiles()?.forEach { file ->
             if (file.name.contains(query, ignoreCase = true) ||
                 (searchContent && file.isFile && containsContent(file, query))) {
@@ -101,15 +100,6 @@ class FileExplorerRepository(private val context: Context) {
         withContext(Dispatchers.IO) {
             try {
                 File(path).deleteRecursively()
-            } catch (e: Exception) {
-                false
-            }
-        }
-
-    suspend fun createDirectory(path: String): Boolean =
-        withContext(Dispatchers.IO) {
-            try {
-                File(path).mkdirs()
             } catch (e: Exception) {
                 false
             }

@@ -12,13 +12,13 @@ import kotlinx.coroutines.launch
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = CleanerRepository(application)
-    
+
     private val _junkFiles = MutableStateFlow<List<JunkFile>>(emptyList())
     val junkFiles: StateFlow<List<JunkFile>> = _junkFiles
-    
+
     private val _isScanning = MutableStateFlow(false)
     val isScanning: StateFlow<Boolean> = _isScanning
-    
+
     fun startJunkScan() {
         viewModelScope.launch {
             _isScanning.value = true
@@ -30,7 +30,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 }
         }
     }
-    
+
     fun cleanSelectedJunk() {
         viewModelScope.launch {
             val selectedFiles = _junkFiles.value.filter { it.isSelected }
