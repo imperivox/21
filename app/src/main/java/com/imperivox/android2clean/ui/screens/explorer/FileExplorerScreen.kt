@@ -1,7 +1,5 @@
 package com.imperivox.android2clean.ui.screens.explorer
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -13,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.imperivox.android2clean.ui.components.explorer.*
+import com.imperivox.android2clean.ui.utils.PermissionsUtil
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
@@ -25,43 +24,30 @@ fun FileExplorerScreen(
     val currentPath by viewModel.currentPath.collectAsState()
     val files by viewModel.files.collectAsState()
     val isSearching by viewModel.isSearching.collectAsState()
-    val hasPermission = remember { mutableStateOf(false) }
+    val error by viewModel.error.collectAsState()
 
     val fileToRename by viewModel.showRenameDialog.collectAsState()
     val fileToCopy by viewModel.showCopyDialog.collectAsState()
     val fileToMove by viewModel.showMoveDialog.collectAsState()
 
-    val permissions = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> {
-            listOf(
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO,
-                Manifest.permission.READ_MEDIA_AUDIO,
-                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-            )
+    val permissionsState = rememberMultiplePermissionsState(
+        permissions = PermissionsUtil.getRequiredPermissions()
+    )
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(permissionsState.allPermissionsGranted) {
+        if (permissionsState.allPermissionsGranted) {
+            viewModel.refresh()
         }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-            listOf(
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO,
-                Manifest.permission.READ_MEDIA_AUDIO
-            )
-        }
-        else -> listOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
     }
 
-    val permissionsState = rememberMultiplePermissionsState(permissions) { granted ->
-        hasPermission.value = granted.all { it.value }
-    }
-
-    LaunchedEffect(Unit) {
-        if (!permissionsState.allPermissionsGranted) {
-            permissionsState.launchMultiplePermissionRequest()
-        } else {
-            hasPermission.value = true
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
         }
     }
 
@@ -75,17 +61,20 @@ fun FileExplorerScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.navigateUp() }) {
-                        Icon(Icons.Default.ArrowUpward, "Up")
-                    }
-                    IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(Icons.Default.Refresh, "Refresh")
+                    if (permissionsState.allPermissionsGranted) {
+                        IconButton(onClick = { viewModel.navigateUp() }) {
+                            Icon(Icons.Default.ArrowUpward, "Up")
+                        }
+                        IconButton(onClick = { viewModel.refresh() }) {
+                            Icon(Icons.Default.Refresh, "Refresh")
+                        }
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        if (!hasPermission.value) {
+        if (!permissionsState.allPermissionsGranted) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -96,9 +85,9 @@ fun FileExplorerScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text("Storage permission is required")
+                    Text("Storage permission is required to browse files")
                     Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
-                        Text("Grant Permission")
+                        Text("Grant Permissions")
                     }
                 }
             }
@@ -112,6 +101,7 @@ fun FileExplorerScreen(
                     onSearch = { query, searchContent ->
                         viewModel.searchFiles(query, searchContent)
                     },
+                    isSearching = isSearching,
                     modifier = Modifier.padding(16.dp)
                 )
 

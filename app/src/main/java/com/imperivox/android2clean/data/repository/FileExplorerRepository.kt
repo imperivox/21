@@ -6,47 +6,44 @@ import com.imperivox.android2clean.data.model.FileItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Date
 
 class FileExplorerRepository(private val context: Context) {
     fun listFiles(path: String): Flow<List<FileItem>> = flow {
-        withContext(Dispatchers.IO) {
-            val directory = File(path)
-            val files = directory.listFiles()?.map { file ->
-                FileItem(
-                    name = file.name,
-                    path = file.absolutePath,
-                    size = file.length(),
-                    isDirectory = file.isDirectory,
-                    lastModified = Date(file.lastModified()),
-                    mimeType = getMimeType(file.absolutePath),
-                    isHidden = file.isHidden
-                )
-            }?.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
-            emit(files ?: emptyList())
-        }
-    }
+        val directory = File(path)
+        val files = directory.listFiles()?.map { file ->
+            FileItem(
+                name = file.name,
+                path = file.absolutePath,
+                size = file.length(),
+                isDirectory = file.isDirectory,
+                lastModified = Date(file.lastModified()),
+                mimeType = getMimeType(file.absolutePath),
+                isHidden = file.isHidden
+            )
+        }?.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
+        emit(files ?: emptyList())
+    }.flowOn(Dispatchers.IO)
 
-    suspend fun searchFiles(
+    fun searchFiles(
         query: String,
         searchPath: String,
         searchContent: Boolean = false
     ): Flow<List<FileItem>> = flow {
-        withContext(Dispatchers.IO) {
-            val results = mutableListOf<FileItem>()
-            searchRecursively(File(searchPath), query, searchContent, results)
-            emit(results)
-        }
-    }
+        val results = mutableListOf<FileItem>()
+        searchRecursively(File(searchPath), query, searchContent, results)
+        emit(results)
+    }.flowOn(Dispatchers.IO)
 
-    private fun searchRecursively(
+    private suspend fun searchRecursively(
         directory: File,
         query: String,
         searchContent: Boolean,
         results: MutableList<FileItem>
-    ) {
+    ) = withContext(Dispatchers.IO) {
         directory.listFiles()?.forEach { file ->
             if (file.name.contains(query, ignoreCase = true) ||
                 (searchContent && file.isFile && containsContent(file, query))) {
@@ -81,8 +78,8 @@ class FileExplorerRepository(private val context: Context) {
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
     }
 
-    suspend fun copyFile(source: String, destination: String): Boolean {
-        return withContext(Dispatchers.IO) {
+    suspend fun copyFile(source: String, destination: String): Boolean =
+        withContext(Dispatchers.IO) {
             try {
                 File(source).copyTo(File(destination), overwrite = true)
                 true
@@ -90,35 +87,31 @@ class FileExplorerRepository(private val context: Context) {
                 false
             }
         }
-    }
 
-    suspend fun moveFile(source: String, destination: String): Boolean {
-        return withContext(Dispatchers.IO) {
+    suspend fun moveFile(source: String, destination: String): Boolean =
+        withContext(Dispatchers.IO) {
             try {
                 File(source).renameTo(File(destination))
             } catch (e: Exception) {
                 false
             }
         }
-    }
 
-    suspend fun deleteFile(path: String): Boolean {
-        return withContext(Dispatchers.IO) {
+    suspend fun deleteFile(path: String): Boolean =
+        withContext(Dispatchers.IO) {
             try {
                 File(path).deleteRecursively()
             } catch (e: Exception) {
                 false
             }
         }
-    }
 
-    suspend fun createDirectory(path: String): Boolean {
-        return withContext(Dispatchers.IO) {
+    suspend fun createDirectory(path: String): Boolean =
+        withContext(Dispatchers.IO) {
             try {
                 File(path).mkdirs()
             } catch (e: Exception) {
                 false
             }
         }
-    }
 }
